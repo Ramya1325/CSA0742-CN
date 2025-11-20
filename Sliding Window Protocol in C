@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define TOTAL_FRAMES 10
+#define WINDOW_SIZE 4
+
+// Simulate 20% packet loss
+int frame_lost() {
+    return rand() % 5 == 0;
+}
+
+int main() {
+    int sent = 0;       // next frame to send
+    int ack = 0;        // next expected ACK
+    int i;
+
+    srand(time(NULL));
+
+    printf("Sliding Window Protocol (Go-Back-N) Simulation\n");
+    printf("Total Frames = %d, Window Size = %d\n\n", TOTAL_FRAMES, WINDOW_SIZE);
+
+    while (ack < TOTAL_FRAMES) {
+
+        // Send frames inside the window
+        printf("Sending window: ");
+        for (i = sent; i < sent + WINDOW_SIZE && i < TOTAL_FRAMES; i++) {
+            printf("%d ", i);
+        }
+        printf("\n");
+
+        // Simulate frame transmission
+        for (i = sent; i < sent + WINDOW_SIZE && i < TOTAL_FRAMES; i++) {
+
+            if (!frame_lost()) {
+                printf("Frame %d received correctly. ACK %d sent.\n", i, i);
+                ack = i + 1; // ACK for this frame
+            } else {
+                printf("Frame %d LOST! Receiver waiting again.\n", i);
+                break;  // Go-back-N → restart window
+            }
+        }
+
+        // Move or restart window based on ACK
+        if (i == sent + WINDOW_SIZE || i == TOTAL_FRAMES) {
+            // All frames in window ACKed
+            sent = ack;
+        } else {
+            // Loss occurred → retransmit full window
+            printf("Retransmitting from frame %d\n", sent);
+        }
+
+        printf("-----------------------------\n");
+    }
+
+    printf("All frames transmitted successfully.\n");
+
+    return 0;
+}
