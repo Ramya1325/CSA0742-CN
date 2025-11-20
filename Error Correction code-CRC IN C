@@ -1,0 +1,69 @@
+#include <stdio.h>
+#include <string.h>
+
+void xor_op(char *a, char *b)
+{
+    for (int i = 1; i < strlen(b); i++)
+        a[i] = (a[i] == b[i] ? '0' : '1');
+}
+
+// Perform modulo-2 division
+void crc_division(char data[], char poly[], char remainder[])
+{
+    int poly_len = strlen(poly);
+    int data_len = strlen(data);
+    char temp[20];
+
+    for (int i = 0; i < poly_len; i++)
+        temp[i] = data[i];
+
+    int curr = poly_len;
+    while (curr <= data_len) {
+        if (temp[0] == '1')
+            xor_op(temp, poly);
+        else {
+            for (int i = 1; i < poly_len; i++)
+                temp[i] = (temp[i] == '0' ? '0' : '1'); // XOR with zeros
+        }
+
+        for (int i = 0; i < poly_len - 1; i++)
+            temp[i] = temp[i + 1];
+
+        if (curr < data_len)
+            temp[poly_len - 1] = data[curr];
+
+        curr++;
+    }
+
+    for (int i = 0; i < poly_len - 1; i++)
+        remainder[i] = temp[i];
+}
+
+int main()
+{
+    char data[50], poly[20];
+    char appended[70], remainder[20];
+
+    printf("Enter data bits: ");
+    scanf("%s", data);
+
+    printf("Enter generator polynomial (e.g. 100000111 for CRC-8): ");
+    scanf("%s", poly);
+
+    int d = strlen(data);
+    int p = strlen(poly);
+
+    strcpy(appended, data);
+    for (int i = 0; i < p - 1; i++)
+        appended[d + i] = '0';
+
+    appended[d + p - 1] = '\0';
+
+    crc_division(appended, poly, remainder);
+
+    printf("\nCRC Remainder: %s\n", remainder);
+
+    printf("Transmitted Frame: %s%s\n", data, remainder);
+
+    return 0;
+}
