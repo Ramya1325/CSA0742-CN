@@ -1,0 +1,27 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+// Simple DNS lookup function
+string dns_lookup(string domain) {
+    if (domain == "example.com")
+        return "93.184.216.34";
+    else if (domain == "google.com")
+        return "142.250.190.78";
+    else if (domain == "openai.com")
+        return "104.18.30.55";
+    else
+        return "0.0.0.0";   // unknown domain
+}
+
+int main() {
+    string domain;
+
+    cout << "Enter domain name: ";
+    cin >> domain;
+
+    string ip = dns_lookup(domain);
+    cout << "IP Address: " << ip << endl;
+
+    return 0;
+}
