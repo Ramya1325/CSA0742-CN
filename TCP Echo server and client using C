@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <stdlib.h>
+
+void run_server() {
+    int sockfd, newsock;
+    char buffer[100];
+    struct sockaddr_in serv, cli;
+    socklen_t len = sizeof(cli);
+
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+
+    serv.sin_family = AF_INET;
+    serv.sin_port = htons(8080);
+    serv.sin_addr.s_addr = INADDR_ANY;
+
+    bind(sockfd, (struct sockaddr*)&serv, sizeof(serv));
+    listen(sockfd, 5);
+
+    printf("Server started on port 8080...\n");
+
+    newsock = accept(sockfd, (struct sockaddr*)&cli, &len);
+
+    recv(newsock, buffer, sizeof(buffer), 0);
+    printf("Client sent: %s\n", buffer);
+
+    send(newsock, buffer, strlen(buffer)+1, 0);
+
+    close(newsock);
+    close(sockfd);
+}
+
+void run_client() {
+    int sockfd;
+    char message[100], buffer[100];
+    struct sockaddr_in serv;
+
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+
+    serv.sin_family = AF_INET;
+    serv.sin_port = htons(8080);
+    serv.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    connect(sockfd, (struct sockaddr*)&serv, sizeof(serv));
+
+    printf("Enter message: ");
+    scanf("%s", message);
+
+    send(sockfd, message, strlen(message)+1, 0);
+    recv(sockfd, buffer, sizeof(buffer), 0);
+
+    printf("Server echoed: %s\n", buffer);
+
+    close(sockfd);
+}
+
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        printf("Usage:\n");
+        printf("  ./a.out server\n");
+        printf("  ./a.out client\n");
+        return 0;
+    }
+
+    if (strcmp(argv[0], "server") == 0 || strcmp(argv[1], "server") == 0) {
+        run_server();
+    }
+    else if (strcmp(argv[0], "client") == 0 || strcmp(argv[1], "client") == 0) {
+        run_client();
+    }
+    else {
+        printf("Invalid option. Use server or client.\n");
+    }
+    return 0;
+}
